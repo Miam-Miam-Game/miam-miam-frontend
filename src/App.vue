@@ -1,30 +1,49 @@
-<script setup lang="ts">
-import HelloWorld from './components/HelloWorld.vue'
+<script setup>
+import { ref } from "vue";
+import { io } from "socket.io-client";
+
+import WaitingRoom from "./views/GameLobby.vue";
+import GameView from "./views/GameView.vue";
+
+const socket = io("http://localhost:4500");
+
+const gameStarted = ref(false);
+const countdown = ref(null);
+
+// ✅ ICI : écoute du décompte serveur
+socket.on("countdown", value => {
+  countdown.value = value;
+});
+
+// ✅ Début réel du jeu
+socket.on("gameStart", () => {
+  countdown.value = null;
+  gameStarted.value = true;
+});
+
+// ✅ Fin du jeu
+socket.on("gameEnd", () => {
+  gameStarted.value = false;
+});
 </script>
 
 <template>
-  <div>
-    <a href="https://vite.dev" target="_blank">
-      <img src="/vite.svg" class="logo" alt="Vite logo" />
-    </a>
-    <a href="https://vuejs.org/" target="_blank">
-      <img src="./assets/vue.svg" class="logo vue" alt="Vue logo" />
-    </a>
+  <div v-if="!gameStarted">
+    <WaitingRoom />
+
+    <!-- ✅ affichage du décompte -->
+    <div v-if="countdown !== null" class="countdown">
+      Début dans {{ countdown }}...
+    </div>
   </div>
-  <HelloWorld msg="Vite + Vue" />
+
+  <GameView v-else />
 </template>
 
 <style scoped>
-.logo {
-  height: 6em;
-  padding: 1.5em;
-  will-change: filter;
-  transition: filter 300ms;
-}
-.logo:hover {
-  filter: drop-shadow(0 0 2em #646cffaa);
-}
-.logo.vue:hover {
-  filter: drop-shadow(0 0 2em #42b883aa);
+.countdown {
+  font-size: 32px;
+  font-weight: bold;
+  margin-top: 20px;
 }
 </style>
