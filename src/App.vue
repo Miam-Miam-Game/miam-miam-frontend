@@ -1,49 +1,65 @@
 <script setup>
 import { ref } from "vue";
-import { io } from "socket.io-client";
+import { socket } from "./socket";
 
-import WaitingRoom from "./views/GameLobby.vue";
+import GameLobby from "./views/GameLobby.vue";
 import GameView from "./views/GameView.vue";
 
-const socket = io("http://localhost:4500");
+const joined = ref(false);        // Le joueur a entré son pseudo
+const players = ref([]);          // Liste des joueurs
+const playerInfo = ref(null);     // Infos du joueur (numéro, couleur, pseudo)
+const countdown = ref(null);      // Décompte avant la partie
+const gameStarted = ref(false);   // La partie commence
 
-const gameStarted = ref(false);
-const countdown = ref(null);
+/* --- Le joueur a rejoint --- */
+socket.on("playerInfo", data => {
+  playerInfo.value = data;
+  joined.value = true;
+});
 
-// ✅ ICI : écoute du décompte serveur
+/* --- Salle d’attente --- */
+socket.on("waitingRoom", data => {
+  players.value = data.players;
+});
+
+/* --- Décompte --- */
 socket.on("countdown", value => {
   countdown.value = value;
 });
 
-// ✅ Début réel du jeu
+/* --- Début du jeu --- */
 socket.on("gameStart", () => {
-  countdown.value = null;
   gameStarted.value = true;
 });
 
-// ✅ Fin du jeu
+/* --- Fin du jeu --- */
 socket.on("gameEnd", () => {
   gameStarted.value = false;
+  joined.value = false;
+  countdown.value = null;
+  players.value = [];
+  playerInfo.value = null;
 });
 </script>
 
 <template>
-  <div v-if="!gameStarted">
-    <WaitingRoom />
+  <!-- Pas encore rejoint -->
+  <GameLobby
+    v-if="!joined"
+  />
 
-    <!-- ✅ affichage du décompte -->
-    <div v-if="countdown !== null" class="countdown">
-      Début dans {{ countdown }}...
-    </div>
+  <!-- Rejoint mais partie pas encore lancée -->
+  <div v-else-if="!gameStarted">
+    <GameLobby
+      :players="players"
+      :countdown="countdown"
+      joined
+    />
   </div>
 
-  <GameView v-else />
+  <!-- Partie en cours -->
+  <GameView
+    v-else
+    :playerInfo="playerInfo"
+  />
 </template>
-
-<style scoped>
-.countdown {
-  font-size: 32px;
-  font-weight: bold;
-  margin-top: 20px;
-}
-</style>
