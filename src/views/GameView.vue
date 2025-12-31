@@ -1,5 +1,5 @@
 <script setup>
-import { ref } from "vue";
+import { ref, onMounted, onBeforeUnmount } from "vue";
 import { socket } from "../socket";
 
 const props = defineProps({
@@ -10,6 +10,22 @@ const props = defineProps({
 const gameState = ref({
   players: [] // [{ num, username, color, x, y }]
 });
+
+function handleKey(e) {
+  if (e.key === "ArrowUp") socket.emit("move", { direction: "ArrowUp" });
+  if (e.key === "ArrowDown") socket.emit("move", { direction: "ArrowDown" });
+  if (e.key === "ArrowLeft") socket.emit("move", { direction: "ArrowLeft" });
+  if (e.key === "ArrowRight") socket.emit("move", { direction: "ArrowRight" });
+}
+
+onMounted(() => {
+  window.addEventListener("keydown", handleKey);
+});
+
+onBeforeUnmount(() => {
+  window.removeEventListener("keydown", handleKey);
+});
+
 
 // écoute du serveur
 socket.on("gameState", state => {
