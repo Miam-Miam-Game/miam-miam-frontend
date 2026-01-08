@@ -3,7 +3,6 @@ import vue from '@vitejs/plugin-vue'
 import path from 'path'
 
 export default defineConfig({
-  base: '/miam-miam-frontend/',
   plugins: [vue()],
   server: {
     port: 3000,
