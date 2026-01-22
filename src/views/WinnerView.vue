@@ -2,6 +2,8 @@
 import { computed } from "vue";
 
 const props = defineProps({
+  isTie: Boolean,
+  winners: Array,
   bestPlayer: Object,
   players: Array,
   isRecord: Boolean,
@@ -19,31 +21,41 @@ const sortedPlayers = computed(() =>
     <div class="winner-screen">
       <h1 class="title">🏆 Fin du jeu !</h1>
 
-      <div class="winner-card">
+      <!-- 🟩 Cas normal : un seul gagnant -->
+      <div v-if="!isTie" class="winner-card">
         <h2>Vainqueur</h2>
         <p class="winner-name">{{ bestPlayer.username }}</p>
         <p class="winner-score">Score : {{ bestPlayer.score }}</p>
       </div>
 
-      <div
-        v-if="isRecord == true"
-        class="record-beaten"
-        >
+      <!-- 🟦 Cas égalité -->
+      <div v-else class="winner-card tie-card">
+        <h2>Égalité !</h2>
+        <p class="tie-subtitle">Les joueurs suivants sont ex æquo :</p>
+
+        <ul class="tie-list">
+          <li v-for="w in winners" :key="w.idPlayer">
+            <span class="pixel-dot" :style="{ '--player-color': w.color }"></span>
+            {{ w.username }} — {{ w.score }} pts
+          </li>
+        </ul>
+      </div>
+
+
+      <!-- Record -->
+      <div v-if="isRecord" class="record-beaten">
         🎉 Nouveau record battu !
         <br />
-        Ancien record : {{ bestRecord.username }} - {{ bestRecord.score }} (pts)
+        Ancien record : {{ bestRecord.username }} - {{ bestRecord.score }} pts
         <br />
-        Nouveau record : {{ bestPlayer.username }} - {{ bestPlayer.score }} (pts)
+        Nouveau record : {{ bestPlayer.username }} - {{ bestPlayer.score }} pts
       </div>
 
-      <div
-        v-else
-        class="record-info"
-        >
-        Record actuel : {{ bestRecord.username }} - {{ bestRecord.score }} (pts)
+      <div v-else class="record-info">
+        Record actuel : {{ bestRecord.username }} - {{ bestRecord.score }} pts
       </div>
 
-
+      <!-- Classement -->
       <h3 class="ranking-title">Classement</h3>
       <ul class="ranking-list">
         <li v-for="p in sortedPlayers" :key="p.idPlayer">
@@ -58,6 +70,7 @@ const sortedPlayers = computed(() =>
       </button>
     </div>
   </div>
+
 </template>
 
 
@@ -72,6 +85,23 @@ const sortedPlayers = computed(() =>
 
   background: linear-gradient(135deg, #fdf4ff, #fce7f3);
 }
+
+.tie-card {
+  background: #ffeaa7;
+  border: 2px dashed #d63031;
+}
+
+.tie-subtitle {
+  font-size: 1rem;
+  margin-bottom: 10px;
+}
+
+.tie-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
 
 .winner-screen {
   width: 360px;

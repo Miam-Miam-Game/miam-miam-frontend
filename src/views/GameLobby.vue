@@ -1,5 +1,5 @@
 <script setup>
-import { ref } from "vue";
+import { ref, computed } from "vue";
 import { socket } from "../socket";
 import logo from "@/assets/logo.gif";
 
@@ -9,11 +9,40 @@ const props = defineProps({
   joined: Boolean
 });
 
+const availableColors = computed(() => {
+  const taken = props.waitingRoom?.takenColors || [];
+  return colors.filter(c => !taken.includes(c));
+});
+
+
+
 const username = ref("");
+const selectedColor = ref("red"); // couleur par défaut
+const colors = [
+  "#E74C3C", // Rouge Fraise
+  "#3498DB", // Bleu Océan
+  "#2ECC71", // Vert Menthe
+  "#FF6FB5", // Rose Cupcake
+  "#F1C40F", // Jaune Vanille
+  "#9B59B6", // Violet Myrtille
+  "#5DADE2", // Cyan Pastel
+  "#E056FD", // Magenta Candy
+  "#F39C12", // Orange Caramel
+  "#A3E635"  // Vert Pistache
+];
+
+socket.on("colorError", (data) => {
+  alert(data.message); // ou un joli toast
+});
+
 
 function joinGame() {
   if (!username.value) return;
-  socket.emit("join", { username: username.value });
+  socket.emit("join", {
+    username: username.value,
+    color: selectedColor.value
+  });
+
 }
 </script>
 
@@ -25,12 +54,24 @@ function joinGame() {
 
       <!-- Entrée pseudo -->
       <div v-if="!props.joined">
-        <h2>Entrer votre pseudo</h2>
+        <h2>Entre ton pseudo</h2>
           <input
             v-model="username"
             placeholder="Pseudo"
             class="pseudo-input"
+            @keyup.enter="joinGame"
           />
+        <h3>Choisis une couleur</h3>
+
+        <div class="color-picker">
+          <div
+            v-for="color in availableColors"
+            :key="color"
+            class="color-dot"
+            :style="{ backgroundColor: color, border: selectedColor === color ? '2px solid #000' : '2px solid #fff' }"
+            @click="selectedColor = color"
+          ></div>
+        </div>
 
           <button
             @click="joinGame"
@@ -97,6 +138,14 @@ h2 {
   color: #6b21a8;
   font-weight: 700;
 }
+
+h3 {
+  text-align: center;
+  margin-bottom: 15px;
+  color: #6b21a8;
+  font-weight: 700;
+}
+
 
 /* INPUT PSEUDO */
 .pseudo-input {
@@ -277,5 +326,27 @@ h2 {
   margin-left: 6px;
 }
 
-</style>
+.color-picker {
+  display: flex;
+  justify-content: space-between; /* 🔥 répartit les couleurs sur toute la largeur */
+  align-items: center;
+  width: 100%;                    /* prend toute la largeur du conteneur */
+  max-width: 400px;               /* optionnel : limite la largeur */
+  margin: 10px auto 20px;         /* centre le bloc */
+  gap: 10px;                      /* espace entre les carrés */
+}
 
+.color-dot {
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: transform 0.15s ease, border 0.15s ease;
+}
+
+.color-dot:hover {
+  transform: scale(1.15);
+}
+
+
+</style>

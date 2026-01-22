@@ -7,6 +7,16 @@ const idPlayer = ref(null);
 const score = ref(0);
 const gameOverData = ref(null);
 
+const cellSize = 20
+const pawnSize = 28
+const cakeSize = 28
+
+function center(value, size) {
+  return Math.max(0, value * cellSize + cellSize/2 - size/2)
+}
+
+
+
 socket.on("timeLeft", value => {
   timeLeft.value = value;
 });
@@ -66,16 +76,27 @@ socket.on("gameState", state => {
         <div
           v-for="p in gameState.players"
           class="pawn"
-          :style="{ left: p.x * 20 + 'px', top: p.y * 20 + 'px', backgroundColor: p.color }"
+          :style="{
+            left: center(p.x, pawnSize) + 'px',
+            top: center(p.y, pawnSize) + 'px',
+            backgroundColor: p.color
+          }"
         ></div>
 
-        <!-- Cakes (⚠️ déplacer ici !) -->
-        <div
+
+
+        <!-- Cakes (cupcakes) -->
+        <img
           v-for="(c, index) in gameState.cakes"
           :key="'cake-' + index"
+          src="/cupcake.webp"
           class="cake"
-          :style="{ left: c.x * 20 + 'px', top: c.y * 20 + 'px' }"
-        ></div>
+          :style="{
+            left: center(c.x, cakeSize) + 'px',
+            top: center(c.y, cakeSize) + 'px'
+          }"
+        />
+
       </div>
 
     </div>
@@ -99,12 +120,18 @@ socket.on("gameState", state => {
       </p>
 
       <h3>Joueurs</h3>
-      <ul>
-        <li v-for="p in gameState.players" :key="p.num">
+      <div class="players-wrapper">
+        <div
+          v-for="p in gameState.players"
+          :key="p.num"
+          class="player-row"
+        >
           <span class="dot" :style="{ backgroundColor: p.color }"></span>
-          Joueur {{ p.username }} — Score : {{ p.score }}
-        </li>
-      </ul>
+          <span class="name">{{ p.username }}</span>
+          <span class="score">{{ p.score }}</span>
+        </div>
+      </div>
+
     </div>
   </div>
 </template>
@@ -155,6 +182,7 @@ socket.on("gameState", state => {
 .sidebar h3 {
   margin: 4px 0 2px 0; /* réduit fortement l’espace */
   font-size: 1.1rem;
+  color: #6b21a8;;
 }
 
 .sidebar p {
@@ -205,21 +233,18 @@ socket.on("gameState", state => {
 
 /* 🍰 CAKES */
 .cake {
-  width: 20px;
-  height: 20px;
+  width: 25px;
+  height: 25px;
   position: absolute;
-
-  background: radial-gradient(circle at top, #fde68a, #f59e0b);
-  border-radius: 50%;
-  box-shadow:
-    0 0 0 2px #92400e,
-    0 2px 4px rgba(0, 0, 0, 0.4);
+  object-fit: contain;
+  pointer-events: none;
 }
+
 
 /* 🟪 SIDEBAR */
 .sidebar {
   width: 460px;
-  height: 400px;
+  height: 450px;
   padding: 16px;
   margin-left: 20px;
 
@@ -244,15 +269,53 @@ socket.on("gameState", state => {
 
   box-shadow: 0 6px 0 #6d28d9;
 }
+.players-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;     /* 🔥 centre tout dans la sidebar */
+  width: 100%;
+  gap: 6px;
+}
 
-/* 🎨 DOT COULEUR */
+.player-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 90%;              /* 🔥 empêche de dépasser la sidebar */
+  max-width: 220px;        /* optionnel : limite la largeur */
+  padding: 6px 0;
+  border-bottom: 1px solid #eee;
+}
+
+.player-row .name {
+  flex: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.player-row .score {
+  font-weight: 600;
+  color: #444;
+  min-width: 40px;
+  text-align: right;
+}
+
 .dot {
+  width: 16px;
+  height: 16px;
+  border-radius: 4px;
   display: inline-block;
-  width: 14px;
-  height: 14px;
-  border-radius: 50%; /* cercle parfait */
-  margin-right: 6px;
-  background-color: green; /* ou p.color dynamique via style inline */
+  border: 2px solid #fff;
+  box-shadow: 0 0 4px rgba(0,0,0,0.2);
+  flex-shrink: 0;
+}
+
+
+
+.score {
+  font-size: 13px;
+  color: #666;
 }
 
 
