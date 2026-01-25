@@ -79,12 +79,15 @@ function resetGame() {
     <!-- Écran de fin -->
     <WinnerView
       v-else-if="gameOverData"
+      :isTie="gameOverData.isTie"
+      :winners="gameOverData.winners"
       :bestPlayer="gameOverData.bestPlayer"
       :players="gameOverData.players"
       :isRecord="gameOverData.isRecord"
       :bestRecord="gameOverData.bestRecord"
       @restart="resetGame"
     />
+
 
   </div>
 </template>

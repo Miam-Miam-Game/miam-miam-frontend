@@ -20,15 +20,21 @@ const sortedPlayers = computed(() =>
   <div class="winner-wrapper">
     <div class="winner-screen">
       <h1 class="title">🏆 Fin du jeu !</h1>
+      
+      <!-- 🟥 Cas 1 : Aucun gagnant (tout le monde a 0) -->
+      <div v-if="bestPlayer === null" class="winner-card">
+        <h2>Aucun gagnant</h2>
+        <p>Tous les joueurs ont 0 point.</p>
+      </div>
 
-      <!-- 🟩 Cas normal : un seul gagnant -->
-      <div v-if="!isTie" class="winner-card">
+      <!-- 🟩 Cas 2 : Un seul gagnant -->
+      <div v-else-if="!isTie" class="winner-card">
         <h2>Vainqueur</h2>
         <p class="winner-name">{{ bestPlayer.username }}</p>
         <p class="winner-score">Score : {{ bestPlayer.score }}</p>
       </div>
 
-      <!-- 🟦 Cas égalité -->
+      <!-- 🟦 Cas 3 : Égalité -->
       <div v-else class="winner-card tie-card">
         <h2>Égalité !</h2>
         <p class="tie-subtitle">Les joueurs suivants sont ex æquo :</p>
@@ -41,19 +47,21 @@ const sortedPlayers = computed(() =>
         </ul>
       </div>
 
-
       <!-- Record -->
-      <div v-if="isRecord" class="record-beaten">
+      <div v-if="isRecord && bestPlayer" class="record-beaten">
         🎉 Nouveau record battu !
-        <br />
-        Ancien record : {{ bestRecord.username }} - {{ bestRecord.score }} pts
         <br />
         Nouveau record : {{ bestPlayer.username }} - {{ bestPlayer.score }} pts
       </div>
 
-      <div v-else class="record-info">
+      <div v-else-if="bestRecord" class="record-info">
         Record actuel : {{ bestRecord.username }} - {{ bestRecord.score }} pts
       </div>
+
+      <div v-else class="record-info">
+        Aucun record enregistré pour le moment.
+      </div>
+
 
       <!-- Classement -->
       <h3 class="ranking-title">Classement</h3>
@@ -238,6 +246,23 @@ const sortedPlayers = computed(() =>
   text-align: center;
   font-weight: 600;
 }
+
+.pixel-dot {
+  width: 14px;
+  height: 14px;
+
+  border-radius: 3px;
+  background-color: var(--player-color);
+
+  display: inline-block;
+  flex-shrink: 0;
+
+  box-shadow: 0 0 0 2px
+    color-mix(in srgb, var(--player-color), black 20%);
+
+  margin-right: 8px; /* espace entre le jeton et le nom */
+}
+
 
 
 </style>
