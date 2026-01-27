@@ -6,6 +6,7 @@ const timeLeft = ref(0);
 const idPlayer = ref(null);
 const score = ref(0);
 const gameOverData = ref(null);
+const pauseMessage = ref("");
 
 const cellSize = 20
 const pawnSize = 28
@@ -15,6 +16,38 @@ function center(value, size) {
   return Math.max(0, value * cellSize + cellSize/2 - size/2)
 }
 
+function openQuitMenu() {
+  showQuitConfirm.value = true;
+  isPaused.value = true;
+  socket.emit("pauseGame"); // 🔥 pause globale
+}
+
+
+const showQuitConfirm = ref(false);
+const isPaused = ref(false);
+
+function cancelQuit() {
+  showQuitConfirm.value = false;
+  isPaused.value = false;
+  pauseMessage.value = "";
+  socket.emit("resumeGame");
+}
+
+function confirmQuit() {
+  socket.emit("quit");
+  window.location.href = "/";
+}
+
+socket.on("gameResumed", () => {
+  isPaused.value = false;
+  pauseMessage.value = "";
+});
+
+
+socket.on("gamePaused", (data) => {
+  isPaused.value = true;
+  pauseMessage.value = `${data.by} a mis le jeu en pause`;
+});
 
 
 socket.on("timeLeft", value => {
@@ -43,11 +76,14 @@ const bestPlayer = computed(() => {
 
 
 function handleKey(e) {
+  if (isPaused.value) return; // 🔥 bloque les mouvements
+
   if (e.key === "ArrowUp") socket.emit("move", { direction: "ArrowUp" });
   if (e.key === "ArrowDown") socket.emit("move", { direction: "ArrowDown" });
   if (e.key === "ArrowLeft") socket.emit("move", { direction: "ArrowLeft" });
   if (e.key === "ArrowRight") socket.emit("move", { direction: "ArrowRight" });
 }
+
 
 onMounted(() => {
   window.addEventListener("keydown", handleKey);
@@ -68,7 +104,11 @@ socket.on("gameState", state => {
   <div class="game-wrapper">
 
     <div class="timer">{{ timeLeft }} s</div>
+    <div v-if="pauseMessage" class="pause-banner">
+      {{ pauseMessage }}
+    </div>
 
+    <button class="quit-btn" @click="openQuitMenu">Quitter</button>
     <!-- 🟦 Zone de jeu -->
     <div class="game-area">
       <div class="board">
@@ -133,6 +173,20 @@ socket.on("gameState", state => {
       </div>
 
     </div>
+
+    <!-- 🟥 Fenêtre de confirmation -->
+    <div v-if="showQuitConfirm" class="quit-overlay">
+      <div class="quit-box">
+        <h2>Quitter la partie ?</h2>
+        <p>La partie s'arrêtera pour tous les joueurs.</p>
+
+        <div class="quit-buttons">
+          <button class="yes" @click="confirmQuit">Oui</button>
+          <button class="no" @click="cancelQuit">Non</button>
+        </div>
+      </div>
+    </div>
+
   </div>
 </template>
 
@@ -311,12 +365,103 @@ socket.on("gameState", state => {
   flex-shrink: 0;
 }
 
-
-
 .score {
   font-size: 13px;
   color: #666;
 }
 
+.quit-btn {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+
+  padding: 10px 16px;
+  border-radius: 12px;
+  border: none;
+
+  background: #ef4444;
+  color: white;
+  font-weight: bold;
+  font-size: 1rem;
+
+  box-shadow: 0 4px 0 #b91c1c;
+  cursor: pointer;
+  z-index: 20;
+}
+
+.quit-btn:active {
+  transform: translateY(3px);
+  box-shadow: 0 2px 0 #b91c1c;
+}
+
+/* 🔥 Overlay pause */
+.quit-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.5);
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  z-index: 9999;
+}
+
+/* 🔥 Fenêtre */
+.quit-box {
+  background: white;
+  padding: 24px;
+  border-radius: 16px;
+  width: 300px;
+
+  text-align: center;
+  border: 4px solid #f0abfc;
+  box-shadow: 0 8px 0 #d946ef;
+}
+
+.quit-buttons {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 20px;
+}
+
+.quit-buttons .yes,
+.quit-buttons .no {
+  width: 45%;
+  padding: 10px;
+  border-radius: 12px;
+  border: none;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.quit-buttons .yes {
+  background: #ef4444;
+  color: white;
+  box-shadow: 0 4px 0 #b91c1c;
+}
+
+.quit-buttons .no {
+  background: #6b21a8;
+  color: white;
+  box-shadow: 0 4px 0 #4c1d95;
+}
+
+.pause-banner {
+  position: absolute;
+  top: 80px;
+  left: 50%;
+  transform: translateX(-50%);
+
+  background: #facc15;
+  color: #4c1d95;
+  padding: 10px 20px;
+  border-radius: 12px;
+  font-weight: bold;
+  font-size: 1.1rem;
+
+  box-shadow: 0 4px 0 #d97706;
+  z-index: 50;
+}
 
 </style>
