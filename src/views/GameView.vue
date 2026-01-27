@@ -35,7 +35,7 @@ function cancelQuit() {
 
 function confirmQuit() {
   socket.emit("quit");
-  window.location.href = "/";
+  window.location.href = "/miam-miam-frontend/";
 }
 
 socket.on("gameResumed", () => {
