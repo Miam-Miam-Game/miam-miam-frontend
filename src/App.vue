@@ -24,6 +24,7 @@ socket.on("playerInfo", data => {
 /* --- Salle d’attente --- */
 socket.on("waitingRoom", data => {
   players.value = data.players;
+  joined.value = true;
 });
 
 /* --- Décompte --- */

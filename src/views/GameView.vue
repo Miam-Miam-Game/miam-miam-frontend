@@ -19,7 +19,7 @@ function center(value, size) {
 function openQuitMenu() {
   showQuitConfirm.value = true;
   isPaused.value = true;
-  socket.emit("pauseGame"); // 🔥 pause globale
+  socket.emit("pauseGame"); // pause globale
 }
 
 
@@ -109,7 +109,7 @@ socket.on("gameState", state => {
     </div>
 
     <button class="quit-btn" @click="openQuitMenu">Quitter</button>
-    <!-- 🟦 Zone de jeu -->
+    <!-- Zone de jeu -->
     <div class="game-area">
       <div class="board">
         <!-- Pions -->
@@ -141,7 +141,7 @@ socket.on("gameState", state => {
 
     </div>
 
-    <!-- 🟧 Infos du joueur -->
+    <!-- Infos du joueur -->
     <div class="sidebar">
       <div v-if="bestPlayer" class="best-score">
         <h3>Meilleur score</h3>
@@ -174,7 +174,7 @@ socket.on("gameState", state => {
 
     </div>
 
-    <!-- 🟥 Fenêtre de confirmation -->
+    <!-- Fenêtre de confirmation -->
     <div v-if="showQuitConfirm" class="quit-overlay">
       <div class="quit-box">
         <h2>Quitter la partie ?</h2>
@@ -191,7 +191,7 @@ socket.on("gameState", state => {
 </template>
 
 <style scoped>
-/* 🌌 ÉCRAN DE JEU PLEIN ÉCRAN */
+/* ÉCRAN DE JEU PLEIN ÉCRAN */
 .game-wrapper {
   position: fixed;
   inset: 0;

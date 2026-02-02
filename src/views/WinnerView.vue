@@ -21,20 +21,20 @@ const sortedPlayers = computed(() =>
     <div class="winner-screen">
       <h1 class="title">🏆 Fin du jeu !</h1>
       
-      <!-- 🟥 Cas 1 : Aucun gagnant (tout le monde a 0) -->
+      <!-- Cas 1 : Aucun gagnant (tout le monde a 0) -->
       <div v-if="bestPlayer === null" class="winner-card">
         <h2>Aucun gagnant</h2>
         <p>Tous les joueurs ont 0 point.</p>
       </div>
 
-      <!-- 🟩 Cas 2 : Un seul gagnant -->
+      <!-- Cas 2 : Un seul gagnant -->
       <div v-else-if="!isTie" class="winner-card">
         <h2>Vainqueur</h2>
         <p class="winner-name">{{ bestPlayer.username }}</p>
         <p class="winner-score">Score : {{ bestPlayer.score }}</p>
       </div>
 
-      <!-- 🟦 Cas 3 : Égalité -->
+      <!-- Cas 3 : Égalité -->
       <div v-else class="winner-card tie-card">
         <h2>Égalité !</h2>
         <p class="tie-subtitle">Les joueurs suivants sont ex æquo :</p>
