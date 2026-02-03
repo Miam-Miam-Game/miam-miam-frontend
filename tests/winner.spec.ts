@@ -7,7 +7,7 @@ test.describe("WinnerView – fin de partie réelle à 3 joueurs", () => {
       const context = await browser.newContext({ storageState: undefined });
       const page = await context.newPage();
 
-      await page.goto("http://localhost:3000/");
+      await page.goto("http://localhost:3000/miam-miam-frontend/");
 
       await expect(page.locator(".pseudo-input")).toBeVisible();
       await page.fill(".pseudo-input", username);
