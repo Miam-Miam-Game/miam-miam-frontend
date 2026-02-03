@@ -18,32 +18,46 @@ jobs:
         with:
           node-version: lts/*
 
+      # 🟢 Cloner le backend depuis GitHub
+      - name: Clone backend repository
+        run: |
+          git clone https://github.com/Miam-Miam-Game/miam-miam-backend.git backend
+
+      # 🟢 Installer dépendances backend
       - name: Install backend dependencies
-        working-directory: ../miam-miam-backend
+        working-directory: backend
         run: npm ci
 
+      # 🟢 Lancer backend NestJS
       - name: Start backend
-        working-directory: ../miam-miam-backend
+        working-directory: backend
         run: npm run start:dev &
-      
+
+      # 🟢 Attendre que le backend soit prêt (port 4500)
       - name: Wait for backend
         run: npx wait-on http://localhost:4500
 
+      # 🟢 Installer dépendances frontend
       - name: Install frontend dependencies
         run: npm ci
 
+      # 🟢 Installer navigateurs Playwright
       - name: Install Playwright Browsers
         run: npx playwright install --with-deps
 
+      # 🟢 Lancer frontend
       - name: Start frontend
         run: npm run dev &
-      
+
+      # 🟢 Attendre que le frontend soit prêt
       - name: Wait for frontend
         run: npx wait-on http://localhost:3000/miam-miam-frontend/
 
+      # 🟢 Lancer les tests Playwright
       - name: Run Playwright tests
         run: npx playwright test
 
+      # 🟢 Upload du rapport
       - uses: actions/upload-artifact@v4
         if: ${{ !cancelled() }}
         with:
